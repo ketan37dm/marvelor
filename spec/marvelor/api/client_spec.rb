@@ -16,6 +16,14 @@ describe Marvelor::API::Client do
     let(:client) { my_client }
 
     describe '#characters' do
+      subject { my_client.characters }
+
+      it 'should return list of characters' do
+        expect(subject).to eq(true)
+      end
+    end
+
+    describe '#characters' do
       before do
         stub_get('characters?apikey=123456&ts=1&hash=d4f1bab013916a533ef31e3ad5fb0887', 'characters/characters.json')
       end
@@ -59,8 +67,8 @@ end
 private
 
 def my_client
-  Marvelor::API::Client.new(
+  Marvelor::API::Client.new({
     public_key: '35ba892b1c7e6b0a210c06357b898989',
     private_key: '203ad89b51deac9e302502339c744702b2d9513b'
-  )
+  })
 end
