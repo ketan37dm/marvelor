@@ -13,62 +13,68 @@ describe Marvelor::API::Client do
   end
 
   context "Characters Endpoints" do
-    let(:client) { my_client }
+    let(:public_key) { 'public_key' }
+    let(:private_key) { 'private_key' }
+    let(:client) { Marvelor::API::Client.new(public_key: public_key, private_key: private_key) }
 
     describe '#characters' do
-      subject { my_client.characters }
+      subject { client.characters }
 
-      it 'should return list of characters' do
-        expect(subject).to eq(true)
-      end
-    end
+      context 'when wrong api key is passed' do
+        let(:public_key) { '234234' }
 
-    describe '#characters' do
-      before do
-        stub_get('characters?apikey=123456&ts=1&hash=d4f1bab013916a533ef31e3ad5fb0887', 'characters/characters.json')
-      end
-
-      it 'returns a Marvelite::API::Response object' do
-        expect(client.characters).to be_a(Marvelite::API::Response)
+        it 'should return an error for InvalidCredentials' do
+          response = subject
+          expect(response.code).to eq(401)
+          expect(response['code']).to eq('InvalidCredentials')
+        end
       end
 
-      it 'Response object is populated with JSON from the /characters endpoint' do
-        expect(client.characters["status"]).to eq("Ok")
-        expect(client.characters[:data][:results].size).to eq(20)
-      end
-    end
-
-    describe '#character' do
-      before do
-        stub_get('characters?name=Spider-Man&apikey=123456&ts=1&hash=d4f1bab013916a533ef31e3ad5fb0887', 'characters/character.json')
-        stub_get('characters/1009610?apikey=123456&ts=1&hash=d4f1bab013916a533ef31e3ad5fb0887', 'characters/character.json')
-        stub_get('characters/1009227?apikey=123456&ts=1&hash=d4f1bab013916a533ef31e3ad5fb0887', 'characters/character_2.json')
-      end
-      it 'returns a Marvelite::API::Response object' do
-        expect(client.character(1009610)).to be_a(Marvelite::API::Response)
+      context 'when api key is correct' do
+        it 'should return list of characters' do
+          response = subject
+          expect(response.code).to eq(200)
+        end
       end
 
-      it 'Response object is populated with JSON from the /characters/:id endpoint' do
-        expect(client.character(1009610)[:data][:results][0][:name]).to eq('Spider-Man')
+      context 'when pagination params are not passed' do
+        it 'should return list with default count' do
+          response = subject
+          expect(response['data']['count']).to eq(Marvelor::API::CharacterInfo::PER_PAGE)
+        end
       end
 
-      it 'accepts an Integer as character id' do
-        expect(client.character(1009610)[:data][:results][0][:name]).to eq('Spider-Man')
-        expect(client.character(1009227)[:data][:results][0][:name]).to eq('Carnage')
+      context 'when limit are passed' do
+        subject { client.characters({ limit: limit }) }
+
+        context 'when limit is passed' do
+          let(:limit) { 5 }
+
+          it 'should return list with given count' do
+            response = subject
+            expect(response['data']['count']).to eq(limit)
+          end
+        end
+
+        context 'when limit is exceeded' do
+          let(:limit) { 500 }
+
+          it 'should return limit exceeded error' do
+            expect(subject['code']).to eq(409)
+            expect(subject['status']).to eq('You may not request more than 100 items.')
+          end
+        end
       end
 
-      it 'accepts a String as character name' do
-        expect(client.character('Spider-Man')[:data][:results][0][:name]).to eq('Spider-Man')
+      context 'when name of the character is passed' do
+        let(:name) { 'hulk' }
+        subject { client.characters({ name: name }) }
+
+        it 'should return list with matching name' do
+          response = subject
+          expect(response['data']['results'].first['name'].downcase).to eq('hulk')
+        end
       end
     end
   end
-end
-
-private
-
-def my_client
-  Marvelor::API::Client.new({
-    public_key: '35ba892b1c7e6b0a210c06357b898989',
-    private_key: '203ad89b51deac9e302502339c744702b2d9513b'
-  })
 end
