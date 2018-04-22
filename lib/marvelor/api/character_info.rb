@@ -12,6 +12,11 @@ module Marvelor
 
       def fetch_response
         self.class.get(url, params)
+      rescue => e
+        {
+          error_class: e.class.name,
+          message: e.message
+        }
       end
 
       private
