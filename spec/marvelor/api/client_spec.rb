@@ -13,8 +13,8 @@ describe Marvelor::API::Client do
   end
 
   context "Characters Endpoints" do
-    let(:public_key) { 'public_key' }
-    let(:private_key) { 'private_key' }
+    let(:public_key) { 'pub' }
+    let(:private_key) { 'pri' }
     let(:client) { Marvelor::API::Client.new(public_key: public_key, private_key: private_key) }
 
     describe '#characters' do
@@ -73,6 +73,29 @@ describe Marvelor::API::Client do
         it 'should return list with matching name' do
           response = subject
           expect(response['data']['results'].first['name'].downcase).to eq('hulk')
+        end
+      end
+
+      context 'when ID of the character is passed' do
+        subject { client.characters({ id: id }) }
+
+        context 'when ID is invalid' do
+          let(:id) { 12 }
+
+          it 'should respond back with error' do
+            response = subject
+            expect(response.code).to eq(404)
+            expect(response['status']).to eq("We couldn't find that character")
+          end
+        end
+
+        context 'when ID is valid' do
+          let(:id) { 1009144 }
+
+          it 'should respond back with correct record' do
+            response = subject
+            expect(response['data']['results'].first['id']).to eq(id)
+          end
         end
       end
     end
