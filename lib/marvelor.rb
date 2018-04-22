@@ -1,9 +1,9 @@
-require "marvelor/version"
+require_relative "marvelor/version"
 require "httparty"
-require "digest/md5"
-require "marvelor/api/base_info"
-require "marvelor/api/character_info"
-require "marvelor/api/client"
+require "digest"
+require_relative "marvelor/api/base_info"
+require_relative "marvelor/api/character_info"
+require_relative "marvelor/api/client"
 
 module Marvelor
 end
