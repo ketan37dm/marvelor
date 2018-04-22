@@ -1,28 +1,35 @@
 # Marvelor
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/marvelor`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is a WIP wrapper gem for Marvel's API
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'marvelor'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install marvelor
+You can clone the directory and manually install it for your application as of now.
+I will publish this once it is ready.
 
 ## Usage
 
-TODO: Write usage instructions here
+Please register first in the [Marvel Comics Developer
+Portal](http://developer.marvel.com/) to get your API credentials (a public key
+and a private key, you'll need them both to configure and instantiate a client).
+
+### Instantiate a client
+
+```ruby
+client = Marvelite::API::Client.new(public_key: 'your_public_key', private_key: 'your_private_key')
+
+# fetch a list of characters
+client.characters
+
+# find a specific character by name
+client.characters(name: 'hulk')
+
+# use limit and offset for pagination behavior
+client.characters(limit: 10, offset: 400)
+
+# fetch a single character by ID
+client.character(id: 1009610)
+```
 
 ## Development
 
